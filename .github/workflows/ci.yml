@@ -102,7 +102,7 @@ jobs:
   deploy :
     name : deploy to production server 
     needs : [ infrastructure , ci ]  
-    run-on:  ubuntu-latest 
+    runs-on:  ubuntu-latest 
     steps : 
       - name: 'download Artifact'
         uses: actions/download-artifact@v4
