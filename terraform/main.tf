@@ -27,12 +27,11 @@ resource "aws_subnet" "public_subnets" {
  cidr_block = element(var.public_subnet_cidrs, count.index)
  tags = {
    Name = "Public Subnet ${count.index + 1}"
- }
+ }variable "image_id" {
+  type        = string
+  description = "The id of the machine image (AMI) to use for the server."
 }
-resource "aws_internet_gateway" "gw" {
- vpc_id = aws_vpc.main.id
- tags = {
-   Name = "Project VPC IG"
+
  }
 }
 resource "aws_route_table" "second_rt" {
@@ -52,7 +51,7 @@ resource "aws_route_table_association" "public_subnet_asso" {
 }
 resource "aws_key_pair" "ubuntu" {
   key_name   = "ubuntu"
-  public_key = file("key.pub")
+  public_key = var.PUB_KEY
 }
 
 resource "aws_security_group" "ubuntu" {
@@ -102,16 +101,18 @@ resource "aws_instance" "ubuntu" {
     aws_security_group.ubuntu.id
   ]
 
- 
-
-  
+ variable "image_id" {
+  type        = string
+  description = "The id of the machine image (AMI) to use for the server."
 }
 
-resource "aws_eip" "ubuntu" {
-  vpc      = true
   instance = aws_instance.ubuntu.id
 }
 output "ec2_ip"  {
   description = "Elastic ip address for Envoy nlb services"
   value       = aws_eip.ubuntu.public_ip
+}
+variable "PUB_KEY" {
+  type        = string
+  description = "The id of the machine image (AMI) to use for the server."
 }
