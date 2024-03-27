@@ -102,11 +102,13 @@ resource "aws_instance" "ubuntu" {
     aws_security_group.ubuntu.id
   ]
 
- variable "image_id" {
-  type        = string
-  description = "The id of the machine image (AMI) to use for the server."
+ 
+
+  
 }
 
+resource "aws_eip" "ubuntu" {
+  vpc      = true
   instance = aws_instance.ubuntu.id
 }
 output "ec2_ip"  {
@@ -117,3 +119,4 @@ variable "PUB_KEY" {
   type        = string
   description = "The id of the machine image (AMI) to use for the server."
 }
+
