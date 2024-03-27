@@ -17,7 +17,7 @@ on:
       - '*.md'
 
 jobs:
-  test:
+  ci:
     name: Node ${{ matrix.node_version }} - On ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
@@ -55,6 +55,17 @@ jobs:
       - name: Test
         run: |
           npm run test:ci
+      - name: build
+        run: |
+          npm run build
+
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@v4
+        with:
+          name: website
+          path: dist/
+          retention-days: 5
+  
 
       
   
@@ -68,7 +79,9 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
       TF_VAR_PUB_KEY: ${{secrets.PUB_KEY}}
-      
+    
+    outputs:
+      ip: ${{steps.ip.outputs.ip}}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -83,4 +96,17 @@ jobs:
       
       - name: Terraform Apply
         run: terraform -chdir=terraform apply --auto-approve 
-      
+      - name : get address
+        run : echo "ip=$(terraform-bin -chdir=terraform output ec2_ip)" | tr "\"" "\0" >> "$GITHUB_OUTPUT"
+        id : ip
+  deploy :
+    name : deploy to production server 
+    needs : [ infrastructure , ci ]  
+    run-on:  ubuntu-latest 
+    steps : 
+      - name: 'download Artifact'
+        uses: actions/download-artifact@v4
+        with:
+          name: website
+          path: dist/
+          

@@ -93,6 +93,12 @@ resource "aws_instance" "ubuntu" {
   ami           = "ami-0c101f26f147fa7fd"
   instance_type = "t2.micro"
    subnet_id     = aws_subnet.public_subnets[0].id
+   user_data = <<EOF
+    #!/bin/bash
+    sudo yum install -y nodejs
+    sudo npm install pm2@latest -g
+    pm2 startup
+    EOF
 
   tags = {
     Name = "ubuntu"
