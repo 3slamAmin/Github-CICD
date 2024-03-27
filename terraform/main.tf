@@ -27,11 +27,12 @@ resource "aws_subnet" "public_subnets" {
  cidr_block = element(var.public_subnet_cidrs, count.index)
  tags = {
    Name = "Public Subnet ${count.index + 1}"
- }variable "image_id" {
-  type        = string
-  description = "The id of the machine image (AMI) to use for the server."
+ }
 }
-
+resource "aws_internet_gateway" "gw" {
+ vpc_id = aws_vpc.main.id
+ tags = {
+   Name = "Project VPC IG"
  }
 }
 resource "aws_route_table" "second_rt" {
