@@ -12,13 +12,18 @@ on:
       - 'docs/**'
       - '*.md'
   pull_request:
-    paths-ignore:@ext:vscode.github-authentication
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+
+jobs:
+  test:
     name: Node ${{ matrix.node_version }} - On ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        os: [ ubuntu-latest]
+        os: [ ubuntu-latest ]
 
     steps:
       - name: Checkout
@@ -74,5 +79,5 @@ on:
      
       
       - name: Terraform Apply
-        run: terraform  -chdir=terraform apply --auto-approve 
+        run: terraform -chdir=terraform apply --auto-approve 
       
