@@ -141,3 +141,7 @@ jobs:
             sudo yum install -y nodejs
             sudo npm install pm2@latest -g
             sudo pm2 startup
+            cd app/dist/
+            npm install 
+            sudo PORT=80 pm2 start "node main.js" 
+             
