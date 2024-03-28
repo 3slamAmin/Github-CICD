@@ -103,8 +103,8 @@ jobs:
           echo ip=$(terraform-bin -chdir=terraform output ec2_ip | tr "\"" " ") >> "$GITHUB_OUTPUT"
       - name : test
         run: | 
-         echo ${{steps.ip.outputs.ip}}
-         echo  ${{ needs.infrastructure.outputs.ip }}   
+          echo ${{steps.ip.outputs.ip}}
+          echo  ${{ needs.infrastructure.outputs.ip }}   
       
   deploy :
     name : deploy to production server 
