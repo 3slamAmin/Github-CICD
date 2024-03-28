@@ -112,6 +112,7 @@ jobs:
     needs : [ infrastructure , ci ]  
     runs-on:  ubuntu-latest 
     
+    
     steps : 
       - name: 'download Artifact'
         uses: actions/download-artifact@v4
@@ -129,4 +130,8 @@ jobs:
           key: ${{ secrets.PRI_KEY }}
           source: "dist/"
           target: "~/app"
-     
+      - name : install pm2 
+        run : | 
+          sudo yum install -y nodejs
+          sudo npm install pm2@latest -g
+          sudo pm2 startup
