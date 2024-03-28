@@ -81,7 +81,7 @@ jobs:
       TF_VAR_PUB_KEY: ${{secrets.PUB_KEY}}
     
     outputs:
-      ip: ${{steps.ip.outputs.ip}}
+      ip: ${{steps.ip_address.outputs.ip}}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -97,8 +97,9 @@ jobs:
       - name: Terraform Apply
         run: terraform -chdir=terraform apply --auto-approve 
       - name : get address
+        id : ip_address
         run : |
-          terraform-bin -chdir=terraform output ec2_ip | tr "\"" "\0" >> ip.txt
+          terraform-bin -chdir=terraform output  -raw ec2_ip   >> ip.txt
 
           echo "ip=$(cat ip.txt)" >> "$GITHUB_OUTPUT"
       - name : test
@@ -117,15 +118,12 @@ jobs:
         with:
           name: website
           path: dist/
-      - name : echo address 
-        env:
-          IP: ${{needs.infrastructure.outputs.ip}}
-        run : echo  $IP   
+      
 
       - name: copy file via ssh key
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: $IP 
+          host:  ${{needs.infrastructure.outputs.ip}}
           username: ec2-user
           port: 22
           key: ${{ secrets.PRI_KEY }}
