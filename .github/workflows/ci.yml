@@ -98,9 +98,9 @@ jobs:
         run: terraform -chdir=terraform apply --auto-approve 
       - name : get address
         run : |
-          terraform-bin -chdir=terraform output ec2_ip | tr "\"" "\0"
+          terraform-bin -chdir=terraform output ec2_ip | tr "\"" " "
 
-          echo ip=$(terraform-bin -chdir=terraform output ec2_ip | tr "\"" "\0") >> "$GITHUB_OUTPUT"
+          echo ip=$(terraform-bin -chdir=terraform output ec2_ip | tr "\"" " ") >> "$GITHUB_OUTPUT"
       
   deploy :
     name : deploy to production server 
@@ -112,6 +112,9 @@ jobs:
         with:
           name: website
           path: dist/
+      - name : echo address 
+        run : echo  ${{ needs.infrastructure.outputs.ip }}  
+
       - name: copy file via ssh key
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -121,5 +124,4 @@ jobs:
           key: ${{ secrets.PRI_KEY }}
           source: "dist/"
           target: "~/app"
-      - name : echo address 
-        run : echo  ${{ needs.infrastructure.outputs.ip }}
+     
