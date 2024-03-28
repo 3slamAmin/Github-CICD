@@ -130,8 +130,14 @@ jobs:
           key: ${{ secrets.PRI_KEY }}
           source: "dist/"
           target: "~/app"
-      - name : install pm2 
-        run : | 
-          sudo yum install -y nodejs
-          sudo npm install pm2@latest -g
-          sudo pm2 startup
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ needs.infrastructure.outputs.ip }}
+          username: ec2-user
+          key: ${{ secrets.PRI_KEY}}
+          port: 22
+          script: |
+            sudo yum install -y nodejs
+            sudo npm install pm2@latest -g
+            sudo pm2 startup
