@@ -109,4 +109,13 @@ jobs:
         with:
           name: website
           path: dist/
-          
+      - name: copy file via ssh key
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ needs.infrastructure.outputs.ip }}
+          username: ec2-user
+          port: 22
+          key: ${{ secrets.PRI_KEY }}
+          source: "dist/"
+          target: "~/app"
+                
