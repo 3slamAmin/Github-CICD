@@ -97,8 +97,11 @@ jobs:
       - name: Terraform Apply
         run: terraform -chdir=terraform apply --auto-approve 
       - name : get address
-        run : echo "ip=$(terraform-bin -chdir=terraform output ec2_ip)" | tr "\"" "\0" >> "$GITHUB_OUTPUT"
-        id : ip
+        run : |
+        terraform-bin -chdir=terraform output ec2_ip | tr "\"" "\0"
+
+         echo ip=$(terraform-bin -chdir=terraform output ec2_ip | tr "\"" "\0") >> "$GITHUB_OUTPUT"
+      
   deploy :
     name : deploy to production server 
     needs : [ infrastructure , ci ]  
@@ -118,4 +121,5 @@ jobs:
           key: ${{ secrets.PRI_KEY }}
           source: "dist/"
           target: "~/app"
-                
+      - name : echo address 
+        run : echo  ${{ needs.infrastructure.outputs.ip }}
