@@ -98,9 +98,9 @@ jobs:
         run: terraform -chdir=terraform apply --auto-approve 
       - name : get address
         run : |
-          terraform-bin -chdir=terraform output ec2_ip | tr "\"" " "
+          terraform-bin -chdir=terraform output ec2_ip | tr "\"" "\0" >> ip.txt
 
-          echo ip=$(terraform-bin -chdir=terraform output ec2_ip | tr "\"" " ") >> "$GITHUB_OUTPUT"
+          echo "ip=$(cat ip.txt)" >> "$GITHUB_OUTPUT"
       - name : test
         run: | 
           echo ${{steps.ip.outputs.ip}}
@@ -110,8 +110,7 @@ jobs:
     name : deploy to production server 
     needs : [ infrastructure , ci ]  
     runs-on:  ubuntu-latest 
-    env:
-      IP: ${{needs.infrastructure.outputs.ip}}
+    
     steps : 
       - name: 'download Artifact'
         uses: actions/download-artifact@v4
@@ -119,6 +118,8 @@ jobs:
           name: website
           path: dist/
       - name : echo address 
+        env:
+          IP: ${{needs.infrastructure.outputs.ip}}
         run : echo  $IP   
 
       - name: copy file via ssh key
