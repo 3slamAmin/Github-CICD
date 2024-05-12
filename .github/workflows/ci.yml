@@ -91,7 +91,15 @@ jobs:
       
       - name: Terraform Init
         run:  terraform  -chdir=terraform init
-      
+        
+      - name: Run Terrascan
+        id: terrascan
+        uses: tenable/terrascan-action@main
+        with:
+          iac_type: 'terraform'
+          iac_version: 'v14'
+          policy_type: 'aws'
+          only_warn: true
      
       
       - name: Terraform Apply

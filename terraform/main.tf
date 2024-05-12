@@ -1,7 +1,8 @@
 terraform {
   backend "s3" {
     bucket = "statefile-eskam-storage"
-    key    = "statefile"
+    dynamodb_table = "terraform-state-lock-dynamo"  
+    key    = "statefile_2"
     region = "us-east-1"
   }
 }
