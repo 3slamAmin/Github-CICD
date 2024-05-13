@@ -67,8 +67,11 @@ jobs:
           command: c
           files: ./dist 
           outPath: dist.tar.gz
+      - name: Set outputs
+        id: tags
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - name: Create annotation for build error
-        run: echo "${{ github.head_ref }}"
+        run: echo "${{ steps.tags.outputs.sha_short }}"
       - name: release
         uses: actions/create-release@v1
         id: create_release
@@ -76,7 +79,7 @@ jobs:
           draft: false
           prerelease: false
           release_name: ${{ steps.version.outputs.version }}
-          tag_name: ${{ github.head_ref }}
+          tag_name: ${{ steps.tags.outputs.sha_short }}
           # body_path: CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
