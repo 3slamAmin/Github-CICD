@@ -59,6 +59,25 @@ jobs:
         run: |
           npm run build
           npm run post-build
+
+      - name: Compress action step
+        uses: a7ul/tar-action@v1.1.0
+        id: compress
+        with:
+          command: c
+          files: ./dist 
+          outPath: dist.tar.gz
+
+      - name: upload linux artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist.tar.gz
+          asset_name: dist.tar.gz
+          asset_content_type: application/gzip
+
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v4
         with:
@@ -71,85 +90,85 @@ jobs:
   
 
 
-  infrastructure:
-    name: create infra using terraform
-    runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
-      TF_VAR_PUB_KEY: ${{secrets.PUB_KEY}}
+  # infrastructure:
+  #   name: create infra using terraform
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #     AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+  #     TF_VAR_PUB_KEY: ${{secrets.PUB_KEY}}
     
-    outputs:
-      ip: ${{steps.ip_address.outputs.ip}}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+  #   outputs:
+  #     ip: ${{steps.ip_address.outputs.ip}}
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
        
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
+  #     - name: Set up Terraform
+  #       uses: hashicorp/setup-terraform@v1
       
-      - name: Terraform Init
-        run:  terraform  -chdir=terraform init
+  #     - name: Terraform Init
+  #       run:  terraform  -chdir=terraform init
         
-      - name: Run Terrascan
-        id: terrascan
-        uses: tenable/terrascan-action@main
-        with:
-          iac_type: 'terraform'
-          iac_version: 'v14'
-          policy_type: 'aws'
-          only_warn: true
+  #     - name: Run Terrascan
+  #       id: terrascan
+  #       uses: tenable/terrascan-action@main
+  #       with:
+  #         iac_type: 'terraform'
+  #         iac_version: 'v14'
+  #         policy_type: 'aws'
+  #         only_warn: true
      
       
-      - name: Terraform Apply
-        run: terraform -chdir=terraform apply --auto-approve 
-      - name : get address
-        id : ip_address
-        run : |
-          terraform-bin -chdir=terraform output  -raw ec2_ip   >> ip.txt
+  #     - name: Terraform Apply
+  #       run: terraform -chdir=terraform apply --auto-approve 
+  #     - name : get address
+  #       id : ip_address
+  #       run : |
+  #         terraform-bin -chdir=terraform output  -raw ec2_ip   >> ip.txt
 
-          echo "ip=$(cat ip.txt)" >> "$GITHUB_OUTPUT"
-      - name : test
-        run: | 
-          echo ${{steps.ip.outputs.ip}}
-          echo  ${{ needs.infrastructure.outputs.ip }}   
+  #         echo "ip=$(cat ip.txt)" >> "$GITHUB_OUTPUT"
+  #     - name : test
+  #       run: | 
+  #         echo ${{steps.ip.outputs.ip}}
+  #         echo  ${{ needs.infrastructure.outputs.ip }}   
       
-  deploy :
-    name : deploy to production server 
-    needs : [ infrastructure , ci ]  
-    runs-on:  ubuntu-latest 
+  # deploy :
+  #   name : deploy to production server 
+  #   needs : [ infrastructure , ci ]  
+  #   runs-on:  ubuntu-latest 
     
     
-    steps : 
-      - name: 'download Artifact'
-        uses: actions/download-artifact@v4
-        with:
-          name: website
-          path: dist/
+  #   steps : 
+  #     - name: 'download Artifact'
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: website
+  #         path: dist/
       
 
-      - name: copy file via ssh key
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host:  ${{needs.infrastructure.outputs.ip}}
-          username: ec2-user
-          port: 22
-          key: ${{ secrets.PRI_KEY }}
-          source: "dist/"
-          target: "~/app"
-      - name: executing remote ssh commands using password
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ needs.infrastructure.outputs.ip }}
-          username: ec2-user
-          key: ${{ secrets.PRI_KEY}}
-          port: 22
-          script: |
-            sudo yum install -y nodejs
-            sudo npm install pm2@latest -g
-            sudo pm2 startup
-            cd app/dist/
-            npm install 
-            sudo PORT=80 pm2 start "node main.js" 
+  #     - name: copy file via ssh key
+  #       uses: appleboy/scp-action@v0.1.7
+  #       with:
+  #         host:  ${{needs.infrastructure.outputs.ip}}
+  #         username: ec2-user
+  #         port: 22
+  #         key: ${{ secrets.PRI_KEY }}
+  #         source: "dist/"
+  #         target: "~/app"
+  #     - name: executing remote ssh commands using password
+  #       uses: appleboy/ssh-action@v1.0.3
+  #       with:
+  #         host: ${{ needs.infrastructure.outputs.ip }}
+  #         username: ec2-user
+  #         key: ${{ secrets.PRI_KEY}}
+  #         port: 22
+  #         script: |
+  #           sudo yum install -y nodejs
+  #           sudo npm install pm2@latest -g
+  #           sudo pm2 startup
+  #           cd app/dist/
+  #           npm install 
+  #           sudo PORT=80 pm2 start "node main.js" 
              
