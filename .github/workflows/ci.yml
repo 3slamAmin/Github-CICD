@@ -112,7 +112,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: "ghcr.io/node-boilerplate"
+          images: "ghcr.io/${{ github.actor }}/node-boilerplate"
 
       - name: Build and push
         uses: docker/build-push-action@v6
