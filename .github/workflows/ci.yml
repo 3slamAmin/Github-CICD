@@ -199,16 +199,20 @@ jobs:
           tags: |
             type=sha
             type=raw,value=latest,enable={{is_default_branch}}
+        - name: print var
+          env:
+             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }} 
+          run: echo "${{ env.ECR_REGISTRY }}"
 
-      - name: Build and push
-        id : push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: build/docker/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+      # - name: Build and push
+      #   id : push
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     context: .
+      #     file: build/docker/Dockerfile
+      #     push: true
+      #     tags: ${{ steps.meta.outputs.tags }}
+      #     labels: ${{ steps.meta.outputs.labels }}
 
 
       # - name: Generate artifact attestation
