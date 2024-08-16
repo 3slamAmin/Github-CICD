@@ -220,23 +220,22 @@ jobs:
           repository: '3slamAmin/node-boilerplate-Chart'
           path: "."
           token: ${{  secrets.GITHUB_TOKEN}}
-      - name: print directory
-        run: ls 
-      # - name: Configure AWS Credentials
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     aws-region: us-east-1
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-      # - name: Deploy Helm
-      #   uses: bitovi/github-actions-deploy-eks-helm@v1.2.10
-      #   with:
-      #     aws-region: us-east-1
-      #     name : my-test-release
-      #     cluster-name: test_cluster
-      #     chart-path: node-boilerplate-Chart/nodejs-chart/
-      #     values: image.repository=737600136895.dkr.ecr.us-east-1.amazonaws.com/node-boilerplate,image.tag=latest
+     
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+      - name: Deploy Helm
+        uses: bitovi/github-actions-deploy-eks-helm@v1.2.10
+        with:
+          aws-region: us-east-1
+          name : my-test-release
+          cluster-name: test_cluster
+          chart-path: nodejs-chart/
+          values: image.repository=737600136895.dkr.ecr.us-east-1.amazonaws.com/node-boilerplate,image.tag=latest
 
       # - name: Generate artifact attestation
       #   uses: actions/attest-build-provenance@v1
