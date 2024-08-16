@@ -194,7 +194,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{steps.login-ecr.outputs.registry}}/${{ECR_REPOSITORY}}/node-boilerplate
+          images: ${{steps.login-ecr.outputs.registry}}/${{env.ECR_REPOSITORY}}/node-boilerplate
           tags: |
             type=sha
             type=raw,value=latest,enable={{is_default_branch}}
