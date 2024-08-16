@@ -219,7 +219,7 @@ jobs:
         with:
           repository: '3slamAmin/node-boilerplate-Chart'
           path: "."
-          token: ${{ secrets.GITHUB_AUTH_TOKEN }}
+          token: ${{  secrets.GITHUB_TOKEN}}
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
