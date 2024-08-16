@@ -195,7 +195,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }} 
         uses: docker/metadata-action@v5
         with:
-          images: "${{ECR_REGISTRY}}/${{ github.actor }}/node-boilerplate"
+          images: "${{env.ECR_REGISTRY}}/${{ github.actor }}/node-boilerplate"
           tags: |
             type=sha
             type=raw,value=latest,enable={{is_default_branch}}
