@@ -211,7 +211,7 @@ jobs:
   deployment : 
     name: deploy to EKS
     runs-on: ubuntu-latest
-    needs : test
+    #needs : test
     
     steps:
       - name : clone chart
