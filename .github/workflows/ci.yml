@@ -231,7 +231,7 @@ jobs:
         uses: bitovi/github-actions-deploy-eks-helm@v1.2.10
         with:
           aws-region: us-east-1
-          cluster-name: test_cluter
+          cluster-name: test_cluster
           chart-path: node-boilerplate-Chart/nodejs-chart/
           values: image.repository=737600136895.dkr.ecr.us-east-1.amazonaws.com/node-boilerplate,image.tag=latest
 
