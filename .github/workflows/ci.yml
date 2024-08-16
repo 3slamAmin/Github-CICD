@@ -199,7 +199,7 @@ jobs:
           tags: |
             type=sha
             type=raw,value=latest,enable={{is_default_branch}}
-        - name: print var
+      - name: print var
           env:
              ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }} 
           run: echo "${{ env.ECR_REGISTRY }}"
