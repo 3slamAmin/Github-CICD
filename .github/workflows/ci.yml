@@ -17,149 +17,189 @@ on:
       - '*.md'
 
 jobs:
-  test:
-    name: Node ${{ matrix.node_version }} - On ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+  # test:
+  #   name: Node ${{ matrix.node_version }} - On ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
 
-    strategy:
-      matrix:
-        os: [ ubuntu-latest ]
+  #   strategy:
+  #     matrix:
+  #       os: [ ubuntu-latest ]
     
 
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Use Node
+  #       id: setup-node
+  #       uses: actions/setup-node@v4.0.1
+  #       with:
+  #         node-version: 16.x
+  #         cache: 'npm'
+
+  #     - uses: actions/cache@v4
+  #       with:
+  #         path: ~/.npm
+  #         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+  #     - name: Deps
+  #       run: npm ci
+          
+
+  #     - name: Lint
+  #       run: |
+  #         npm run lint
+  #         npm run format:check
+
+  #     - name: Test
+  #       run: |
+  #         npm run test:ci
+  # build-artifact :
+  #   name: built on Node ${{ matrix.node_version }} - On ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   needs : test
+  #   strategy:
+  #     matrix:
+  #       os: [ ubuntu-latest ]
+  #   steps:    
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Use Node
+  #       id: setup-node
+  #       uses: actions/setup-node@v4.0.1
+  #       with:
+  #         node-version: 16.x
+  #         cache: 'npm'
+
+  #     - uses: actions/cache@v4
+  #       with:
+  #         path: ~/.npm
+  #         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+  #     - name: Deps
+  #       run: npm ci
+
+  #     - name: build
+  #       run: |
+  #         npm run build
+  #         npm run post-build
+
+  #     - name: Compress action step
+  #       uses: a7ul/tar-action@v1.1.0
+  #       id: compress
+  #       with:
+  #         command: c
+  #         files: ./dist 
+  #         outPath: dist.tar.gz
+  #     - name: Set outputs
+  #       id: tags
+  #       run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+  #     - name: Create annotation for build error
+  #       run: echo "${{ steps.tags.outputs.sha_short }}"
+  #     - name: release
+  #       uses: actions/create-release@v1
+  #       id: create_release
+  #       with:
+  #         draft: false
+  #         prerelease: false
+  #         release_name: ${{ steps.version.outputs.version }}
+  #         tag_name: ${{ steps.tags.outputs.sha_short }}
+  #         # body_path: CHANGELOG.md
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  #     - name: upload linux artifact
+  #       uses: actions/upload-release-asset@v1
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       with:
+  #         upload_url: ${{ steps.create_release.outputs.upload_url }}
+  #         asset_path: dist.tar.gz
+  #         asset_name: dist.tar.gz
+  #         asset_content_type: application/gzip
+
+  #     - name: 'Upload Artifact'
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: website
+  #         path: dist/
+  #         retention-days: 5
+  # image-build-ghcr :
+  #   name: build image
+  #   runs-on: ubuntu-latest
+  #   needs : test
+  #   permissions:
+  #     contents: read
+  #     packages: write
+  #     attestations: write
+  #     id-token: write
+  #   steps:    
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+     
+  #     - name: Login to GitHub Container Registry
+  #       uses: docker/login-action@v3
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+          
+  #     - name: Docker meta
+  #       id: meta
+  #       uses: docker/metadata-action@v5
+  #       with:
+  #         images: "ghcr.io/${{ github.actor }}/node-boilerplate"
+  #         tags: |
+  #           type=sha
+  #           type=raw,value=latest,enable={{is_default_branch}}
+
+  #     - name: Build and push
+  #       id : push
+  #       with:
+  #         context: .
+  #         file: build/docker/Dockerfile
+  #         push: true
+  #         tags: ${{ steps.meta.outputs.tags }}
+  #         labels: ${{ steps.meta.outputs.labels }}
+  image-build-ecr :
+    name: build image
+    runs-on: ubuntu-latest
+    #needs : test
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Use Node
-        id: setup-node
-        uses: actions/setup-node@v4.0.1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          node-version: 16.x
-          cache: 'npm'
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
 
-      - uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Deps
-        run: npm ci
-          
-
-      - name: Lint
-        run: |
-          npm run lint
-          npm run format:check
-
-      - name: Test
-        run: |
-          npm run test:ci
-  build-artifact :
-    name: built on Node ${{ matrix.node_version }} - On ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    needs : test
-    strategy:
-      matrix:
-        os: [ ubuntu-latest ]
-    steps:    
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Use Node
-        id: setup-node
-        uses: actions/setup-node@v4.0.1
-        with:
-          node-version: 16.x
-          cache: 'npm'
-
-      - uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Deps
-        run: npm ci
-
-      - name: build
-        run: |
-          npm run build
-          npm run post-build
-
-      - name: Compress action step
-        uses: a7ul/tar-action@v1.1.0
-        id: compress
-        with:
-          command: c
-          files: ./dist 
-          outPath: dist.tar.gz
-      - name: Set outputs
-        id: tags
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-      - name: Create annotation for build error
-        run: echo "${{ steps.tags.outputs.sha_short }}"
-      - name: release
-        uses: actions/create-release@v1
-        id: create_release
-        with:
-          draft: false
-          prerelease: false
-          release_name: ${{ steps.version.outputs.version }}
-          tag_name: ${{ steps.tags.outputs.sha_short }}
-          # body_path: CHANGELOG.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: upload linux artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist.tar.gz
-          asset_name: dist.tar.gz
-          asset_content_type: application/gzip
-
-      - name: 'Upload Artifact'
-        uses: actions/upload-artifact@v4
-        with:
-          name: website
-          path: dist/
-          retention-days: 5
-  image-build :
-    name: build image
-    runs-on: ubuntu-latest
-    needs : test
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
-    steps:    
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          
       - name: Docker meta
         id: meta
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }} 
         uses: docker/metadata-action@v5
         with:
-          images: "ghcr.io/${{ github.actor }}/node-boilerplate"
+          images: "${{ECR_REGISTRY}}/${{ github.actor }}/node-boilerplate"
           tags: |
             type=sha
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push
-        uses: docker/build-push-action@v6
         id : push
         with:
           context: .
@@ -167,6 +207,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
 
       # - name: Generate artifact attestation
       #   uses: actions/attest-build-provenance@v1
