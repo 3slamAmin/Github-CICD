@@ -168,15 +168,58 @@ jobs:
   #         push: true
   #         tags: ${{ steps.meta.outputs.tags }}
   #         labels: ${{ steps.meta.outputs.labels }}
-  image-build-ecr :
-    name: build image
+  # image-build-ecr :
+  #   name: build image
+  #   runs-on: ubuntu-latest
+  #   needs : test
+    
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Configure AWS Credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-region: us-east-1
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+
+  #     - name: Login to Amazon ECR
+  #       id: login-ecr
+  #       uses: aws-actions/amazon-ecr-login@v1
+
+  #     - name: Docker meta
+  #       id: meta
+  #       uses: docker/metadata-action@v5
+  #       with:
+  #         images: ${{steps.login-ecr.outputs.registry}}/node-boilerplate
+  #         tags: |
+  #           type=sha
+  #           type=raw,value=latest,enable={{is_default_branch}}
+    
+
+  #     - name: Build and push
+  #       id : push
+  #       uses: docker/build-push-action@v6
+  #       with:
+  #         context: .
+  #         file: build/docker/Dockerfile
+  #         push: true
+  #         tags: ${{ steps.meta.outputs.tags }}
+  #         labels: ${{ steps.meta.outputs.labels }}
+  deployment : 
+    name: deploy to EKS
     runs-on: ubuntu-latest
-    #needs : test
+    needs : test
     
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
+      - name : clone chart
+        uses: actions/checkout@v3
+        with:
+          repository: '3slamAmin/node-boilerplate-Chart'
+          path: "."
+          token: ${{ secrets.GITHUB_AUTH_TOKEN }}
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -184,31 +227,13 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
+      - name: Deploy Helm
+        uses: bitovi/github-actions-deploy-eks-helm@v1.2.10
         with:
-          images: ${{steps.login-ecr.outputs.registry}}/node-boilerplate
-          tags: |
-            type=sha
-            type=raw,value=latest,enable={{is_default_branch}}
-    
-
-      - name: Build and push
-        id : push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: build/docker/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
+          aws-region: us-east-1
+          cluster-name: test_cluter
+          chart-path: node-boilerplate-Chart/nodejs-chart/
+          values: image.repository=737600136895.dkr.ecr.us-east-1.amazonaws.com/node-boilerplate,image.tag=latest
 
       # - name: Generate artifact attestation
       #   uses: actions/attest-build-provenance@v1
