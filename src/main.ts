@@ -26,7 +26,7 @@ export default function main(port: number = Config.port) {
       response.writeHead(200, 'OK')
       response.end(html)
     } catch (error) {
-      console.error('Error reading HTML file:', error)
+      
       response.writeHead(500, 'Internal Server Error')
       response.end('An error occurred')
     }
