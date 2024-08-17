@@ -26,14 +26,14 @@ Finally, the deployment job uses this [helm chart](https://github.com/3slamAmin/
 
 ## Relevant Images
 
-![Pipline](images/image (5).png)
+![Pipline](images/image5.png)
 
 ![EKS](images/image.png)
 
-![ECR](images/image (1).png)
+![ECR](images/image1.png)
 
-![KUBeCTL](images/image (2).png)
+![KUBeCTL](images/image2.png)
 
-![HELM](images/image (3).png)
+![HELM](images/image3.png)
 
-![GHCR](images/image (4).png)
+![GHCR](images/image4.png)
