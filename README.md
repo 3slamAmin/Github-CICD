@@ -4,6 +4,8 @@
     <i>Using This Boilerplate.</i>
 </p>
 
+![Project](images/intro.png)
+
 ## Overview
 
 I've applied a few DevOps principles to this project
@@ -24,8 +26,14 @@ Finally, the deployment job uses this [helm chart](https://github.com/3slamAmin/
 
 ## Relevant Images
 
-![ECR](images/image.png)
+![Pipline](images/image (5).png)
+
+![EKS](images/image.png)
+
 ![ECR](images/image (1).png)
-![ECR](images/image (2).png)
-![ECR](images/image (3).png)
-![ECR](images/image (4).png)
+
+![KUBeCTL](images/image (2).png)
+
+![HELM](images/image (3).png)
+
+![GHCR](images/image (4).png)
