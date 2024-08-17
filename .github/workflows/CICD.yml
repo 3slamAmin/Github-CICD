@@ -47,6 +47,10 @@ jobs:
       - name: Deps
         run: npm ci
           
+      - name: format
+        run: |
+          npm run format
+          
 
       - name: Lint
         run: |
